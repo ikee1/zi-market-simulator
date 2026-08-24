@@ -3,7 +3,7 @@ from orders import Order
 from agents import StandardAgent
 from engine import LimitOrderBook
 
-simulation = Simulator()
+simulation = Simulator(num_agents = 4)
 
-simulation.run(10)
+simulation.run(5)
 

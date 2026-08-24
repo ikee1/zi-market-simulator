@@ -76,7 +76,7 @@ print(f"Remaining ask details: {dict(book._asks)}")
 print(f"Remaining bid price levels: {list(book._bids_list)}")
 print(f"Remaining bid details: {dict(book._bids)}")"""
 
-NUM_AGENTS = 5
+"""NUM_AGENTS = 5
 agents = []
 for i in range(NUM_AGENTS):
     agent = StandardAgent()
@@ -87,4 +87,14 @@ print(agents)
 agentA = agents[0]
 
 order = agentA.create_order(1)
-print(order.get_price(), order)
+print(order.get_price(), order)"""
+
+lob = LimitOrderBook()
+order1 = Order(100, 100, True, 0)
+order2 = Order(99, 50, False, 1)
+lob.process_order(order1)
+lob.process_order(order2)
+lob.get_simple_ask_table()
+lob.get_simple_bid_table()
+
+

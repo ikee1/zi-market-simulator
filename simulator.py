@@ -9,8 +9,8 @@ class Simulator:
     """
     Where the market simulation itself sits, controls time steps and agent generation etc.
     """
-    def __init__(self):
-        self.NUM_AGENTS = 500
+    def __init__(self, num_agents=500):
+        self.NUM_AGENTS = num_agents
         self.time = 0
         self.agents = []
         self.lob = LimitOrderBook()

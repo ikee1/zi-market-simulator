@@ -83,3 +83,8 @@ for i in range(NUM_AGENTS):
     agents.append(agent)
 
 print(agents)
+
+agentA = agents[0]
+
+order = agentA.create_order(1)
+print(order.get_price(), order)

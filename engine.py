@@ -30,7 +30,7 @@ class LimitOrderBook:
         # logic for matching incoming bids, then add to book whatever is left
         # bit uncertain about adding an order with less count, maybe juse use a reduce count/set count method or smth?
         while order.get_count() > 0 and order.get_id() not in self._order_ids:  # is this check even needed?? oh i spose so
-            print("check started")
+            #print("check started")
             if len(self._asks_list) == 0:  # if no asks in book, simply add the bid directly
                 # and exit while loop
                 self.add_bid(order)
@@ -86,7 +86,7 @@ class LimitOrderBook:
         # next job 
         while order.get_count() > 0 and order.get_id() not in self._order_ids:
             #logic, very similar, calculate difference etc etc.
-            print(f"check started")
+            #print(f"check started")
             if len(self._bids_list) == 0:
                 self.add_ask(order)
                 break
@@ -145,8 +145,24 @@ class LimitOrderBook:
         self._order_ids.append(self._next_id)
         self._next_id += 1
 
+    def get_simple_bid_table(self):
+        print(f'{'Bids':<6}')
+        print(f"{'Order ID':<6} {'Price':<8} {'Quantity':<10} {'Timestamp/s':<8}")
+        print('-' * 45)
+        for price in reversed(self._bids_list):
+            for order in self._bids[price]:
+                print(f'{order.get_id():<6} {order.get_price():<8} {order.get_count():<10} {order.get_timestamp():<8}')
+    
+    def get_simple_ask_table(self):
+        print(f'{'Asks':<6}')
+        print(f"{'Order ID':<6} {'Price':<8} {'Quantity':<10} {'Timestamp/s':<8}")
+        print('-' * 45)
+        for price in self._asks_list:
+            for order in self._asks[price]:
+                print(f'{order.get_id():<6} {order.get_price():<8} {order.get_count():<10} {order.get_timestamp():<8}')
+
     def get_asks(self):
-        return self._asks
+        return self._asks       
     
     def get_bids(self):
         return self._bids

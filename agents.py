@@ -30,22 +30,26 @@ class StandardAgent(AgentBase):
         self.std_dev = std_dev
         self.current_price = 0
     
-    def set_fair_price(self, previous_trade):
+    def set_fair_price(self, default_price=100, previous_trade=None):
         # current fair price will be previous trade's price
         # plus some deviation defined by internal standard deviation
         # setup a normal distribution use box-muller
         z0 = maths.box_muller()
         dev = z0 * self.std_dev
-        self.current_price = previous_trade + dev
+        if previous_trade != None:
+            self.current_price = previous_trade + dev
+        self.current_price = round(default_price + dev)
 
-    def create_order(self):
+    def create_order(self, timestamp: int):
         # create order object
         # first consider a random multiple of 100 between say 100 and 1000 inclusive
         count = 100 * np.random.randint(1, 11)
         # for creation of random boolean for bid or ask
         rand_num = np.random.randint(0, 2)
         bid = True if rand_num < 0.5 else False
-        order = Order(self.current_price, count,  bid)
+        self.set_fair_price()
+        order = Order(self.current_price, count,  bid, timestamp)
+        print("order created")
         return order
     
         # THOROUGHLY READ OVER THIS, MIGHT BE V WRONG.

@@ -7,7 +7,7 @@ import random
 
 class Simulator:
     """
-    Where the market simulation itself runs, controls time steps and agent generation etc.
+    Where the market simulation itself sits, controls time steps and agent generation etc.
     """
     def __init__(self):
         self.NUM_AGENTS = 500
@@ -22,6 +22,8 @@ class Simulator:
         for i in range(NUM_RUNS):
             # select a random agent
             agent = random.choice(self.agents)
-            
-
-        
+            order = agent.create_order(self.time)
+            self.lob.process_order(order)
+            self.time += 1
+        self.lob.get_simple_bid_table()
+        self.lob.get_simple_ask_table()

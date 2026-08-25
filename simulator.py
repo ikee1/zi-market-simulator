@@ -4,6 +4,7 @@ from engine import LimitOrderBook
 
 import numpy as np
 import random
+import matplotlib.pyplot as plt
 
 class Simulator:
     """
@@ -27,3 +28,22 @@ class Simulator:
             self.time += 1
         self.lob.get_simple_bid_table()
         self.lob.get_simple_ask_table()
+        trades = self.lob.get_trades()
+
+        # processing trades
+        prices = []
+        for trade in trades:
+            prices.append(trade.get_price())
+
+        indices = np.arange(len(prices))
+        fig, ax1 = plt.subplots()
+
+        ax1.set_ylabel("price/GBP")
+        ax1.set_xlabel("trade event")
+        ax1.plot(indices, prices, "blue")
+        ax1.set_title(f"no. of runs: {NUM_RUNS}\nno. agents: {self.NUM_AGENTS}\nfair price: £100")
+
+        plt.show()
+
+        
+

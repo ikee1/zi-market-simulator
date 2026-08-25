@@ -1,4 +1,4 @@
-from orders import Order
+from orders import Order, Trade
 from collections import deque, defaultdict
 from sortedcontainers import SortedList
 class LimitOrderBook:
@@ -10,6 +10,7 @@ class LimitOrderBook:
         self._asks = defaultdict(deque)
         self._bids_list = SortedList([])
         self._asks_list = SortedList([])  # list all available keys for bids/asks
+        self._completed_trades = []
         self._next_id = 1
         self._order_ids = []
 
@@ -44,6 +45,8 @@ class LimitOrderBook:
                     order.add_count(-existing_count) # take the counts from existing ask from the counts of the incoming bid
                     # remove order from dictionary
                     # and remove counts (will be zero)
+                    trade = Trade(matching_key[0].get_price(), existing_count, order.get_timestamp())
+                    self._completed_trades.append(trade)
                     matching_key[0].add_count(-existing_count)
                     matching_key.popleft()
                     # check dictionary, does it still have any elements left in that key?
@@ -59,6 +62,8 @@ class LimitOrderBook:
                     # order will never enter the book, will be completely used up
                     # remove counts from existing order
                     matching_key[0].add_count(-order.get_count())
+                    trade = Trade(matching_key[0].get_price(), order.get_count(), order.get_timestamp())
+                    self._completed_trades.append(trade)
                     #still need to add order id to list (in case cancellation? although maybe not relevant here)
                     order.add_count(-order.get_count())
                     order.set_id(self._next_id)
@@ -66,6 +71,8 @@ class LimitOrderBook:
                     self._next_id += 1
                 else: # diff == 0 case
                     order.add_count(-existing_count)
+                    trade = Trade(matching_key[0].get_price(), order.get_count(), order.get_timestamp())
+                    self._completed_trades.append(trade)
                     #still need to add order id to list
                     order.set_id(self._next_id)
                     self._order_ids.append(self._next_id)
@@ -97,10 +104,12 @@ class LimitOrderBook:
                 if diff > 0:
                     # order will use up entirity of existing 
                     order.add_count(-existing_count)
+                    # create trade object
+                    trade = Trade(matching_key[0].get_price(), existing_count, order.get_timestamp())
+                    self._completed_trades.append(trade)
                     # remove existing order
                     matching_key[0].add_count(-existing_count)
                     matching_key.popleft()
-                    
                     #check if there are any bids left at that price, if not
                     # remove key from dict + remove number from price list
                     if len(matching_key) == 0:
@@ -110,6 +119,8 @@ class LimitOrderBook:
                 elif diff < 0:
                     # order will be used up entirely. 
                     matching_key[0].add_count(-order.get_count())
+                    trade = Trade(matching_key[0].get_price(), order.get_count(), order.get_timestamp())
+                    self._completed_trades.append(trade)
                     # order count to 0
                     order.add_count(-order.get_count())
                     # add order id
@@ -119,6 +130,7 @@ class LimitOrderBook:
                 else:  # diff == 0 case
                     #order used up, not added to book + matching order removed
                     order.add_count(-order.get_count())
+                    trade = Trade(matching_key[0].get_price(), order.get_count(), order.get_timestamp())
                     matching_key[0].add_count(-existing_count)
                     matching_key.popleft()
 
@@ -166,3 +178,6 @@ class LimitOrderBook:
     
     def get_bids(self):
         return self._bids
+    
+    def get_trades(self):
+        return self._completed_trades

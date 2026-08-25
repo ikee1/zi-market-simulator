@@ -42,3 +42,21 @@ class Order:
 
     def add_count(self, count):
         self._count += count
+
+class Trade:
+    """
+    Contains information on trades, (the entities involved?), (the Order objects involved?), the price, the quantity, timestamp
+    """
+    def __init__(self, price: int, count: int, timestamp: int):
+        self._price = price
+        self._count = count
+        self._timestamp = timestamp
+
+    def get_price(self):
+        return self._price
+    
+    def get_count(self):
+        return self._count
+    
+    def get_timestamp(self):
+        return self._timestamp

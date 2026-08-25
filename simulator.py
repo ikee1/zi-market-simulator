@@ -23,7 +23,8 @@ class Simulator:
         for i in range(NUM_RUNS):
             # select a random agent
             agent = random.choice(self.agents)
-            order = agent.create_order(self.time)
+            trades = self.lob.get_trades()
+            order = agent.create_order(self.time, prev_price=trades[-1].get_price()) if len(trades) != 0 else agent.create_order(self.time)
             self.lob.process_order(order)
             self.time += 1
         self.lob.get_simple_bid_table()
@@ -31,19 +32,27 @@ class Simulator:
         trades = self.lob.get_trades()
 
         # processing trades
-        prices = []
-        for trade in trades:
-            prices.append(trade.get_price())
+        # prices = []
+        # differences = []
+        # for i in range(len(trades)):
+            # prices.append(trades[i].get_price())
+            # diff = trades[i].get_price() - trades[i-1].get_price() if i != 0 else 0
+            # differences.append(diff)
 
-        indices = np.arange(len(prices))
-        fig, ax1 = plt.subplots()
+        # indices = np.arange(len(prices))
+        #fig, ax1 = plt.subplots()
 
-        ax1.set_ylabel("price/GBP")
-        ax1.set_xlabel("trade event")
-        ax1.plot(indices, prices, "blue")
-        ax1.set_title(f"no. of runs: {NUM_RUNS}\nno. agents: {self.NUM_AGENTS}\nfair price: £100")
+        #ax1.set_ylabel("price/GBP")
+        #ax1.set_xlabel("trade event")
+        #ax1.plot(indices, prices, "blue")
+        #ax1.set_title(f"no. of runs: {NUM_RUNS}\nno. agents: {self.NUM_AGENTS}\nfair price: £100")
 
-        plt.show()
+        #fig, ax2 = plt.subplots()
+        #ax2.plot(indices, differences, "red")
+
+        # plt.show()
+        return trades
+        
 
         
 

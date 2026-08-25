@@ -50,3 +50,9 @@ Initial runs, with a fair price of £100, with all agents placing trades based o
 
 In order to deal w multiple trades per timestep, going to switch to plotting event number on x instead of time. This is as shown below.
 ![alt text](image-1.png)
+
+I then made the fair price at each time step equal to the last traded price at the previous time step, this appeared to lead to a random walk pattern. I thought I was noticing the price tend to some value each time and then stop fluctuating, I will need to investigate this further since I see no reason why that should be the case, the following graph just shows the price converged to on ten different runs, just to confirm there was variation there at least, as expected.
+![alt text](image-2.png)
+
+Consider what metrics to actually analyse 1. to confirm simulator behaves like a market or not? 2. to see if I could actually get real useful simulation data here.
+Also make simulation + run files cleaner and more compartmentalised TO DO.

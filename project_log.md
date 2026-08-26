@@ -56,3 +56,8 @@ I then made the fair price at each time step equal to the last traded price at t
 
 Consider what metrics to actually analyse 1. to confirm simulator behaves like a market or not? 2. to see if I could actually get real useful simulation data here.
 Also make simulation + run files cleaner and more compartmentalised TO DO.
+
+## 26 August 2026
+Am neatening up code by creating analysis.py file which houses functions to return things like a list of prices, quantities, vwap, returns etc., as well as a plots.py to quickly and neatly plot graphs like time-series etc. Will then move on to actually experimenting with these values, and eventually I must consider making agents ditinguishable, first varying standard deviation of each agent, then a limited cash supply and stuff like that. Then consider a market maker etc.
+
+Created functions for returning prices, quantities etc. VWAPs function is by far the most complex so far, I think I could simplify by just adding the values as I go, maybe in the future consider that (*).

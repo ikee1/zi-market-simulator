@@ -10,25 +10,29 @@ class Simulator:
     """
     Where the market simulation itself sits, controls time steps and agent generation etc.
     """
-    def __init__(self, num_agents=500):
+    def __init__(self, num_agents=500, std_deviation_agents = 5):
         self.NUM_AGENTS = num_agents
         self.time = 0
         self.agents = []
         self.lob = LimitOrderBook()
         for i in range(self.NUM_AGENTS):
-            agent = StandardAgent()
+            agent = StandardAgent(std_dev=std_deviation_agents)
             self.agents.append(agent)
 
     def run(self, NUM_RUNS):
+        fp = 100 #initial fair price
         for i in range(NUM_RUNS):
+            if i % 90 == 0:
+                fp += 2
             # select a random agent
-            agent = random.choice(self.agents)
+            agent = random.choice(self.agents) # type: StandardAgent
             trades = self.lob.get_trades()
-            order = agent.create_order(self.time, prev_price=trades[-1].get_price()) if len(trades) != 0 else agent.create_order(self.time)
-            self.lob.process_order(order)
+            order = agent.create_order(self.time, prev_trade=trades[-1], fair_price=fp) if len(trades) != 0 else agent.create_order(self.time, fair_price=fp)
+            if order is not None:
+                self.lob.process_order(order)
             self.time += 1
-        self.lob.get_simple_bid_table()
-        self.lob.get_simple_ask_table()
+        # self.lob.get_simple_bid_table()
+        # self.lob.get_simple_ask_table()
         trades = self.lob.get_trades()
 
         # processing trades

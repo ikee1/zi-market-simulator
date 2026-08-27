@@ -46,13 +46,13 @@ TO DO: create `Trade` object whcih records the price a trade happened at (will t
 Working on implementing th `Trade` object to hold the discussed information. Just realised that if an incoming order matches with more than just 1 existing order, which is completely possible + common, which trade is relevant in terms of the time-series graph, maybe the most recent? note: VWAP (volume weighted average price)
 
 Initial runs, with a fair price of £100, with all agents placing trades based off this, produced a time-series as expected
-![alt text](image.png)
+<img src="image.png" alt=" " width="500">
 
 In order to deal w multiple trades per timestep, going to switch to plotting event number on x instead of time. This is as shown below.
-![alt text](image-1.png)
+<img src="image-1.png" alt=" " width="500">
 
-I then made the fair price at each time step equal to the last traded price at the previous time step, this appeared to lead to a random walk pattern. I thought I was noticing the price tend to some value each time and then stop fluctuating, I will need to investigate this further since I see no reason why that should be the case, the following graph just shows the price converged to on ten different runs, just to confirm there was variation there at least, as expected.
-![alt text](image-2.png)
+I then made the fair price at each time step equal to the last traded price at the previous time step, this appeared to lead to a random walk pattern. I thought I was noticing the price tend to some value each time and then stop fluctuating, I will need to investigate this further since I see no reason why that should be the case, the following graph shows the price converged to on ten different runs, just to confirm there was variation there, as expected.
+<img src="image-2.png" alt="Price convergence over ten runs" width="500">
 
 Consider what metrics to actually analyse 1. to confirm simulator behaves like a market or not? 2. to see if I could actually get real useful simulation data here.
 Also make simulation + run files cleaner and more compartmentalised TO DO.
@@ -60,4 +60,45 @@ Also make simulation + run files cleaner and more compartmentalised TO DO.
 ## 26 August 2026
 Am neatening up code by creating analysis.py file which houses functions to return things like a list of prices, quantities, vwap, returns etc., as well as a plots.py to quickly and neatly plot graphs like time-series etc. Will then move on to actually experimenting with these values, and eventually I must consider making agents ditinguishable, first varying standard deviation of each agent, then a limited cash supply and stuff like that. Then consider a market maker etc.
 
-Created functions for returning prices, quantities etc. VWAPs function is by far the most complex so far, I think I could simplify by just adding the values as I go, maybe in the future consider that (*).
+Created functions for returning prices, quantities etc. VWAPs function is by far the most complex so far, I think I could simplify by just adding the values as I go, maybe in the future consider that (*). Volatility calculations are also considered, later annualised volatility should be considered i.e. taking returns over a time period rather than just between trades.
+
+## 27 August 2026
+I have began to set up `analysis.py` and `run.py` files. I want to start off with just confirming that my simulation follows expected behaviour, I am going to consider returns, log returns, volatility (from standard deviation of returns)
+
+### Experiment: returns, log returns, and volatility
+Number agents: 100
+Number runs: 1000
+std dev. agents = £5
+Expectation: the log returns will be very similar/identical to the returns, since for small returns there is no difference.
+<p align="center">
+<img src="returns.png" alt="returns" width="500">
+<img src="log_returns.png" alt="log returns" width="500">
+</p>
+They are very similar as expected. Volatility is coming out around 0.014-0.019, will test further later on.
+
+### Experiment: Agents' standard deviation effect on volatility
+Number agents: 100
+Number runs: 1000
+Std deviations of agents: 0.5, 1, 1.5, ..., 10
+Hypothesis: Increasing standard deviation -> increased volatility. One caveat is that too large standard deviation may lead to spread being too large and few orders crossing the spread.
+<p align="center">
+<img src="volatility_std_dev.png" alt="volatility against standard deviation of agents" width="500">
+</p>
+This is with 100 trials of 1000 steps at each standard deviation, with the volatility averaged over the 100 trials. I am still seeing very jagged lines, even when averaging over such a large number of trials.
+
+Whilst investigating this further, I realised I was creating the simulation once per deviation, and running the same simulation each trial, I changed to creating the simulation inside the trial loop, so each trial for each deviation has its own new simulation now. This seemingly exposed a new error: the price can feasibly drop below 0/can be 0, this should not be possible. This occurs at larger agent std deviations, although I am unsure why it only happened when I created a new simulation each time.
+
+This is where this model appears to break down, I could implement a rejection of order creations by bots if the price sampled ends up less than 0, but I don't think that i very interesting, similarly with truncating the distribution or even something like increasing probability of a positive variance as it gets closer to one std deviation away from 0, at which point the probability must be 1. This ends are zero-intelligence model since that seems like somewhat rational behaviour, albeit based on something very arbitrary - there is no reason a real person would submit a higher order (buy or sell) just because the stocks value is nearing 0.
+
+So now, I will tie agent price decisions to some "fair-value function", the question this project is trying to answer will change from just ZI traders simulating a market to just how much intelligence must these agents have to succesfully simulate properties of real markets. 
+
+I need to think of a fair price function which itself can never go below 0.
+
+I am considering a fair value which is at a fixed price between earnings reports, it then either goes up or down some amount at the earning report, with a HIGHER chance of going up to indicate general growth of companies over time, which makes sense. Later, I may add some tiny chance every time step for a "major" random event to happen, which could lead to fairvalue plumetting or increasing suddenly. But for now, I will consider each timestep to be 1 day, very 90 days, an "earnings report" will be released, this will cause the fundamental value to change. 
+
+To begin with, I will make the changes wholly deterministic i.e. every 90 days, the fair value simply increases by £2, so £100 -> £102 -> £104 etc etc.
+
+### TO-DO tomorrow: 
+- Re-write agent code, it is obselete and messy and unsure what it does.
+- Test fundamental price mechanics, does the model do as expected?
+- When price is below the fair price, all orders submitted by all agents will be bids, and vice-versa, maybe give each agent their own "interpretation" of the fundamental price to allow for the variance and ensure it never gets stuck below, above, or on the fundamental value.

@@ -12,12 +12,26 @@ def get_quantities(trades):
 def get_timestamps(trades):
     return [trade.get_timestamp() for trade in trades]
 
-def calculate_returns(prices):
+def calculate_returns(trades):
+    prices = get_prices(trades)
     returns = []
     for i in range(len(prices)):
         r = (prices[i] - prices[i-1]) / prices[i-1] if i != 0 else 0
         returns.append(r)
     return returns
+
+def calculate_log_returns(trades):
+    prices = get_prices(trades)
+    ln_returns = []
+    for i in range(len(prices)):
+        r = np.log(prices[i] / prices[i-1]) if i != 0 else 0
+        ln_returns.append(r)
+    return ln_returns
+
+def calculate_volatility(trades):
+    ln_returns = np.array(calculate_log_returns(trades))
+    volatility = np.std(ln_returns)
+    return volatility
 
 def calculate_vwap(trades):
     """

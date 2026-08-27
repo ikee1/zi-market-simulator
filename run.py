@@ -2,24 +2,42 @@ from simulator import Simulator
 from orders import Order
 from agents import StandardAgent
 from engine import LimitOrderBook
+import analysis
+import plots
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-simulation = Simulator(num_agents = 100)
+NUM_RUNS = 1000
+NUM_AGENTS = 100
 
+"""deviations = np.arange(0.5, 10.5, 0.5)
 
-averages = []
-for i in range(10):
-    trades = simulation.run(10000)
-    prices = [trade.get_price() for trade in trades]
-    averages.append(np.sum(prices[-20:]) / 20) # average of the last 20 trade prices, to see where it converges
-indices = np.arange(len(averages))
+avg_volatilities = []
+std_devs = []
+for deviation in deviations:
+    volatilities = []
+    for i in range(100):
+        sim = Simulator(NUM_AGENTS, std_deviation_agents=deviation)
+        print(f"{i}th run of {deviation}")
+        trades = sim.run(NUM_RUNS)
+        volatilities.append(analysis.calculate_volatility(trades))
+    avg = sum(volatilities) / len(volatilities)
+    std_dev = np.std(volatilities)
+    avg_volatilities.append(avg)
+    std_devs.append(std_dev)
 
-fig, ax1 = plt.subplots()
+fig, ax = plt.subplots()
 
-ax1.set_xlabel("run")
-ax1.set_ylabel("final price") # could alter this to test for convergence by having price last ten trades/price last 100 trades sort of thing and if it's 1 it is convergent
-ax1.scatter(indices, averages, color="blue")
+ax.set_xlabel("Standard deviation of agents")
+ax.set_ylabel("Volatility")
+ax.errorbar(deviations, avg_volatilities, yerr=std_devs, color="blue")
+ax.set_title("Volatility against agent standard deviation")
+plt.show()"""
+
+sim = Simulator(NUM_AGENTS)
+
+trades = sim.run(NUM_RUNS)
+
+plots.plot_time_series_event_driven(trades, NUM_AGENTS, NUM_RUNS)
 plt.show()
-

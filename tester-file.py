@@ -1,5 +1,8 @@
+from maths import box_muller
+import matplotlib.pyplot as plt
 import numpy as np
 
-a = np.arange(0.5, 10.5, 0.5)
+import random
 
-print(a)
+deviations = np.linspace(0.5, 10, 20)
+print(deviations) 

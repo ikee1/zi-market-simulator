@@ -21,20 +21,25 @@ class Simulator:
 
     def run(self, NUM_RUNS):
         fp = 100 #initial fair price
+        fps = []
         for i in range(NUM_RUNS):
             if i % 90 == 0:
                 fp += 2
+            fps.append(fp)
             # select a random agent
             agent = random.choice(self.agents) # type: StandardAgent
             trades = self.lob.get_trades()
-            order = agent.create_order(self.time, prev_trade=trades[-1], fair_price=fp) if len(trades) != 0 else agent.create_order(self.time, fair_price=fp)
+            if len(trades) == 0:
+                prev_price = None
+            else:
+                prev_price = trades[-1].get_price()
+            order = agent.create_order(self.time, prev_price, fp)
             if order is not None:
                 self.lob.process_order(order)
             self.time += 1
         # self.lob.get_simple_bid_table()
         # self.lob.get_simple_ask_table()
         trades = self.lob.get_trades()
-
         # processing trades
         # prices = []
         # differences = []
@@ -55,7 +60,7 @@ class Simulator:
         #ax2.plot(indices, differences, "red")
 
         # plt.show()
-        return trades
+        return trades, fps
         
 
         

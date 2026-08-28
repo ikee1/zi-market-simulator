@@ -35,4 +35,16 @@ def plot_log_returns(trades):
     ax.plot(returns, "blue")
     ax.set_title("log returns")
 
+def scatter_fundamental_price(trades, fps):
+    prices = analysis.get_prices(trades)
+    timestamps = analysis.get_timestamps(trades)
+    all_times = np.arange(len(fps))
+
+    fig, ax = plt.subplots()
+    ax.set_ylabel("price GBP")
+    ax.set_xlabel("time")
+    ax.set_title("Trade prices over time, overlay of the evolving fundamental price\nevery 90 steps")
+    ax.scatter(timestamps, prices, label="trade prices", color="blue")
+    ax.plot(all_times, fps, label="fundamental price", color="red")
+    ax.legend()
     

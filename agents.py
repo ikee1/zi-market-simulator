@@ -4,7 +4,7 @@ Zero-Intelligence trader
 import random
 import numpy as np
 from orders import Order, Trade
-import maths
+from maths import box_muller
 import analysis
 
 current_id = 0
@@ -30,39 +30,38 @@ class StandardAgent(AgentBase):
         super().__init__()
         self.std_dev = std_dev
         self.current_price = 0
-    
-    def set_price(self, default_price=100, previous_trade=None):
-        # the agent will generate a random price within a couple of deviations of the 
-        # previous trade's price
-        z0 = maths.box_muller()
-        dev = z0 * self.std_dev
-        if previous_trade != None:
-            self.current_price = round(previous_trade + dev)
-        else:
-            self.current_price = round(default_price + dev)
 
-    def create_order(self, timestamp: int, prev_trade: Trade = None, fair_price = None):
-        # create order object
-        # first consider a random multiple of 100 between say 100 and 1000 inclusive
-        count = 100 * np.random.randint(1, 11)
-        # whether it is a bid or ask must depend on whether the previous trade is more or less than the
-        # current fair value
-        if prev_trade is None:
-            self.set_price(previous_trade=prev_trade)
-            num = random.randint(0,1)
-            bid = True if num < 0.5 else False
-            order = Order(self.current_price, count, bid, timestamp)
-            return order
-        prev_price = prev_trade.get_price()
-        if prev_price < fair_price:
-            bid = True # current price is lower than "fundamental" price, the agent will buy
-        elif prev_price == fair_price:
-            return None # don't trade if price is equal to the fundamental
-        else:
-            bid = False
-        self.set_price(previous_trade=prev_price)
-        order = Order(self.current_price, count,  bid, timestamp)
-        return order
+    def get_trade_price(self, previous_price, fundamental_price):
+        rand = box_muller()  # random normal variable
+        deviation = self.std_dev * rand
+        if previous_price is None:
+            return np.round(fundamental_price + deviation)
+        return np.round(previous_price + deviation)
     
-        # THOROUGHLY READ OVER THIS, MIGHT BE V WRONG.
+    def get_quantity(self, min: int, max: int):
+        # quantity 100 to 1000 at 100 intervals
+        num = np.random.randint(min/100, max/100)
+        quantity = int(num * 100)
+        return quantity
+
+    def get_bid(self, prev_price, fundamental_price):
+        if prev_price is None or prev_price == fundamental_price:
+            return random.choice([True, False])
+        # buy if previous price too low, sell if previous price too high
+        if prev_price < fundamental_price:
+            return True
+        elif prev_price > fundamental_price:
+            return False 
+
+    def create_order(self, timestamp, previous_price, fundamental_price):
+        price = self.get_trade_price(previous_price, fundamental_price)
+        quantity = self.get_quantity(100, 1000)
+        bid = self.get_bid(previous_price, fundamental_price)
+
+        order = Order(price, quantity, bid, timestamp)
+        return order
+
+
+        
+    
 

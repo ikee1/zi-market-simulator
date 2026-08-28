@@ -46,13 +46,13 @@ TO DO: create `Trade` object whcih records the price a trade happened at (will t
 Working on implementing th `Trade` object to hold the discussed information. Just realised that if an incoming order matches with more than just 1 existing order, which is completely possible + common, which trade is relevant in terms of the time-series graph, maybe the most recent? note: VWAP (volume weighted average price)
 
 Initial runs, with a fair price of £100, with all agents placing trades based off this, produced a time-series as expected
-<img src="image.png" alt=" " width="500">
+<img src="figures/image.png" alt=" " width="500">
 
 In order to deal w multiple trades per timestep, going to switch to plotting event number on x instead of time. This is as shown below.
-<img src="image-1.png" alt=" " width="500">
+<img src="figures/image-1.png" alt=" " width="500">
 
 I then made the fair price at each time step equal to the last traded price at the previous time step, this appeared to lead to a random walk pattern. I thought I was noticing the price tend to some value each time and then stop fluctuating, I will need to investigate this further since I see no reason why that should be the case, the following graph shows the price converged to on ten different runs, just to confirm there was variation there, as expected.
-<img src="image-2.png" alt="Price convergence over ten runs" width="500">
+<img src="figures/image-2.png" alt="Price convergence over ten runs" width="500">
 
 Consider what metrics to actually analyse 1. to confirm simulator behaves like a market or not? 2. to see if I could actually get real useful simulation data here.
 Also make simulation + run files cleaner and more compartmentalised TO DO.
@@ -71,8 +71,8 @@ Number runs: 1000
 std dev. agents = £5
 Expectation: the log returns will be very similar/identical to the returns, since for small returns there is no difference.
 <p align="center">
-<img src="returns.png" alt="returns" width="500">
-<img src="log_returns.png" alt="log returns" width="500">
+<img src="figures/returns.png" alt="returns" width="500">
+<img src="figures/log_returns.png" alt="log returns" width="500">
 </p>
 They are very similar as expected. Volatility is coming out around 0.014-0.019, will test further later on.
 
@@ -82,7 +82,7 @@ Number runs: 1000
 Std deviations of agents: 0.5, 1, 1.5, ..., 10
 Hypothesis: Increasing standard deviation -> increased volatility. One caveat is that too large standard deviation may lead to spread being too large and few orders crossing the spread.
 <p align="center">
-<img src="volatility_std_dev.png" alt="volatility against standard deviation of agents" width="500">
+<img src="figures/volatility_std_dev.png" alt="volatility against standard deviation of agents" width="500">
 </p>
 This is with 100 trials of 1000 steps at each standard deviation, with the volatility averaged over the 100 trials. I am still seeing very jagged lines, even when averaging over such a large number of trials.
 
@@ -102,3 +102,22 @@ To begin with, I will make the changes wholly deterministic i.e. every 90 days, 
 - Re-write agent code, it is obselete and messy and unsure what it does.
 - Test fundamental price mechanics, does the model do as expected?
 - When price is below the fair price, all orders submitted by all agents will be bids, and vice-versa, maybe give each agent their own "interpretation" of the fundamental price to allow for the variance and ensure it never gets stuck below, above, or on the fundamental value.
+
+## 28th August 2026
+Agent code rewritten such that bids are placed when previous trade price is below the fundamental price and vice versa when previous trade price is above fundamental price. If previous trade price is equal to the fundamental price OR previous trade price is None (no trades yet), a random order either bid or ask is submitted.
+
+This leads to behaviour which seems expected. Sometimes we witness the trade prices successfully matching the fundamental price throughout the evolution, sometimes they appear to fail to take off and we are left with no orders crossing the book, sometimes it takes a while to take off but eventually does. My guess is that it is very dependant upon whether the first trade provides enough depth to the order book to get things started. The case where it eventually gets going I predict is due to a buy order being generated with a large enough deviation from the box muller calculation to cross the book and start the rise up to the book, I still cannot fully understand how this is working so I will do further tests. The three cases are as below.
+<p align="center">
+<img src="figures/trades_fundamental_price_successful.png" width="300">
+<img src="figures/delayed_fundamental_price.png" width="300">
+<img src="figures/failed_fundamental.png" width="300">
+</p>
+
+Upon testing with different standard deviations, I achieved the following results
+<p align="center">
+<img src="figures/avg_diff.png" width="300">
+<img src="figures/avg_time_to_within_2.png" width="300">
+<img src="figures/avg_num_trades.png" width="300">
+</p>
+
+The average difference graph represents (over 10 runs), the average final difference between the fundamental price and the final trade price. The average time to get within £2 of the fundamental value graph represents the avg number of steps to reach within £2 for the first time, this is slightly skewed toward the lower standard deviations since I am only considering situations where within £2 is reached at all, which is very few out of 10 for the lower standard deviations. So if they are to reach the fundamental value at all, they must do it quickly since it gets much harder as the fundamental value moves upward. And finally, average number of trades simply indicates what it says, it tells us that for the low standard deviations, where fundamental value is rarely reached, the average number of trades is very low and as we go up in standard deviation, we get more trades but not forever, just once we pass about 1.5 - 2, it then remains around 4-500 even for highest std deviations.

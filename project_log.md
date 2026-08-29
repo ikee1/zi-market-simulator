@@ -121,3 +121,63 @@ Upon testing with different standard deviations, I achieved the following result
 </p>
 
 The average difference graph represents (over 10 runs), the average final difference between the fundamental price and the final trade price. The average time to get within £2 of the fundamental value graph represents the avg number of steps to reach within £2 for the first time, this is slightly skewed toward the lower standard deviations since I am only considering situations where within £2 is reached at all, which is very few out of 10 for the lower standard deviations. So if they are to reach the fundamental value at all, they must do it quickly since it gets much harder as the fundamental value moves upward. And finally, average number of trades simply indicates what it says, it tells us that for the low standard deviations, where fundamental value is rarely reached, the average number of trades is very low and as we go up in standard deviation, we get more trades but not forever, just once we pass about 1.5 - 2, it then remains around 4-500 even for highest std deviations.
+
+### TO-DO 
+- Convert prices to pence, slight neatening, test VWAP plots + multiple trades per timestep. Treat each timestep as a day, do a set number of orders per day (could experiment with increasing orders close to certain times e.g. expected earnings reports etc.). 
+- Set-up different agents having different interpretations of the fundamental price (experiment with changing deviations size etc.)
+- Investigate why simulation appears to slow down more than linearly at higher number of steps
+
+Successfully identified and fixed the error making the simulation slower at larger times (more orders and trades). `self._order_ids` was a list, so in the `while` loop which checked if the order had already been added to the list (i.e. processing was finished), it was O(N), now that it is a `set` instead of a `list`, I am getting approximately linear increase in time as number of runs increases.
+```
+simulation for 10000 runs took 0.375 seconds
+simulation for 20000 runs took 1.403 seconds
+simulation for 30000 runs took 2.917 seconds
+simulation for 40000 runs took 5.461 seconds
+simulation for 50000 runs took 8.517 seconds
+simulation for 60000 runs took 11.155 seconds
+simulation for 70000 runs took 16.012 seconds
+simulation for 80000 runs took 21.298 seconds
+simulation for 90000 runs took 27.512 seconds
+simulation for 100000 runs took 33.885 seconds
+```
+TO 
+```
+simulation for 10000 runs took 0.062 seconds
+simulation for 20000 runs took 0.075 seconds
+simulation for 30000 runs took 0.115 seconds
+simulation for 40000 runs took 0.152 seconds
+simulation for 50000 runs took 0.192 seconds
+simulation for 60000 runs took 0.237 seconds
+simulation for 70000 runs took 0.267 seconds
+simulation for 80000 runs took 0.311 seconds
+simulation for 90000 runs took 0.356 seconds
+simulation for 100000 runs took 0.390 seconds
+```
+This is a remarkable increase. In the future, once trades are processed and an order is totally removed from the book again, I may then remove the order if that speeds up, the act of removing may in fact be slower than just leaving it so I shall see.
+
+Tomorrow, introduce agents having different "interpretations" of the fundamental value based again off some normal distribution, this should mean the fundamental price is "found" much more consistently.
+<p align="center">
+<img src="figures/vwap_5sd.png" width="500">
+</p>
+VWAP for each day plot.
+
+In order to actually get stuff I can put on the CV, I need to get some quantifiable things. So one thing will be the general ability of the simulated market to "discover" the fundamental price, measuring things like difference between VWAP and fundamental value, volatility of this error, proportion of simulations that converge, number of trades/liquidity. This has essentially already been considered but just more formally. 
+
+And the main question can be something like does ordre book imbalance predict the direction of the next price movement? Can calculate the ratio 
+I = (V_bids - V_asks)/(V_bids + V_asks)
+Does this being large + positive (i.e. much more bid than ask volume in the book, more demand than supply) lead to positive returns (and vice-versa).
+
+I have now set up the following mechanic:
+- Each agent has two inherent standard deviations: the standard deviation applied to each order's price, and the standard deviation applied to the fundamental price to get its perceived fundamental price.
+- The agent decides upon a buy or sell order by comparing the previous price to its perceived fundamental price (previous price < perceived fundamental price -> buy order and vice versa)
+- The order price is decided by applying the agent's standard deviation for order prices to the perceived fundamental price.
+
+Investigating the MAD, the mean absolute deviation from the fundamental price from each trade resulted in the following graph.
+<p align="center">
+<img src="figures/mad_std.png" width="500">
+</p>
+With fundamental price std in pence. This was for a fundamental price which increased every 90 steps by £2 (100->102->104..). I think the high MAD at low fp std is due to many runs not actually "finding" the fundamental price at all since it is gradually moving away and so they are unable to get a good price around the previous price and so trades dry up, every agent is buying because they still all believe they are below the fundamental price. I will now consider a constant fundamental price, and see if this changes things.
+This produced a graph which was very much what I expected, as fp std increases, so does mean deviation from the fundamental price.
+<p align="center">
+<img src="figures/mad_constant_fp.png" width="500">
+</p>

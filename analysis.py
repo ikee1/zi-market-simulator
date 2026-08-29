@@ -7,7 +7,7 @@ def get_prices(trades):
     return [trade.get_price() for trade in trades]
 
 def get_quantities(trades):
-    return [trade.get_quantity() for trade in trades]
+    return [trade.get_count() for trade in trades]
 
 def get_timestamps(trades):
     return [trade.get_timestamp() for trade in trades]
@@ -73,7 +73,10 @@ def calculate_vwap(trades):
     for i in range(len(times_list)):
         prod = sum(prod_list[i])
         quant = sum(quants_list[i])
-        vwaps.append(prod / quant)
+        if quant != 0:
+            vwaps.append(prod / quant)
+        else: 
+            vwaps.append(vwaps[-1])
 
     return vwaps, times_list
 

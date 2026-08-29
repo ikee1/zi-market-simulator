@@ -1,5 +1,5 @@
 from agents import StandardAgent
-from orders import Order
+from orders import Order, Trade
 from engine import LimitOrderBook
 
 import numpy as np
@@ -10,21 +10,22 @@ class Simulator:
     """
     Where the market simulation itself sits, controls time steps and agent generation etc.
     """
-    def __init__(self, num_agents=500, std_deviation_agents = 5):
+    def __init__(self, num_agents=500, std_deviation_agents=50, fp_std_deviation_agents=10):
         self.NUM_AGENTS = num_agents
         self.time = 0
         self.agents = []
         self.lob = LimitOrderBook()
         for i in range(self.NUM_AGENTS):
-            agent = StandardAgent(std_dev=std_deviation_agents)
+            agent = StandardAgent(order_std=std_deviation_agents, fp_std=fp_std_deviation_agents)
             self.agents.append(agent)
 
     def run(self, NUM_RUNS):
-        fp = 100 #initial fair price
+        fp = 10000  # initial fair price in pence
         fps = []
+        diffs = []
         for i in range(NUM_RUNS):
-            if i % 90 == 0:
-                fp += 2
+            """if i > 0 and i % 90 == 0:
+                fp += 200"""
             fps.append(fp)
             # select a random agent
             agent = random.choice(self.agents) # type: StandardAgent
@@ -35,32 +36,14 @@ class Simulator:
                 prev_price = trades[-1].get_price()
             order = agent.create_order(self.time, prev_price, fp)
             if order is not None:
-                self.lob.process_order(order)
+                new_trades = self.lob.process_order(order) #type: Trade
             self.time += 1
-        # self.lob.get_simple_bid_table()
-        # self.lob.get_simple_ask_table()
+            for trade in new_trades:
+                diff = np.abs(trade.get_price() - fp)
+                diffs.append(diff)
         trades = self.lob.get_trades()
-        # processing trades
-        # prices = []
-        # differences = []
-        # for i in range(len(trades)):
-            # prices.append(trades[i].get_price())
-            # diff = trades[i].get_price() - trades[i-1].get_price() if i != 0 else 0
-            # differences.append(diff)
-
-        # indices = np.arange(len(prices))
-        #fig, ax1 = plt.subplots()
-
-        #ax1.set_ylabel("price/GBP")
-        #ax1.set_xlabel("trade event")
-        #ax1.plot(indices, prices, "blue")
-        #ax1.set_title(f"no. of runs: {NUM_RUNS}\nno. agents: {self.NUM_AGENTS}\nfair price: £100")
-
-        #fig, ax2 = plt.subplots()
-        #ax2.plot(indices, differences, "red")
-
-        # plt.show()
-        return trades, fps
+        mad = np.mean(diffs)
+        return trades, fps, mad
         
 
         

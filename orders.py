@@ -4,7 +4,7 @@ class Order:
     Holds the information on the orders placed to the book        
     """
     def __init__(self, price: int, count: int, bid: bool, time_submitted: int, tif = "gtd", expiry_time: int=None):
-        self._price = price 
+        self._price = price  # in pence
         self._count = count
         self._id = None
         self._bid = bid 
@@ -48,7 +48,7 @@ class Trade:
     Contains information on trades, (the entities involved?), (the Order objects involved?), the price, the quantity, timestamp
     """
     def __init__(self, price: int, count: int, timestamp: int):
-        self._price = price
+        self._price = price  # in pence
         self._count = count
         self._timestamp = timestamp
 

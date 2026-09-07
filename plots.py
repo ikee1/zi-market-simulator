@@ -79,3 +79,11 @@ def plot_mad(stds, mads):
     ax.set_xlabel("Fundamental price interpretation std GBP")
     ax.grid(True, which="both", axis="both", alpha=0.5)
     ax.plot(np.array(stds) / 100, np.array(mads) / 100, "blue")
+
+def plot_num_trades_std(stds, num_trades):
+    fig, ax = plt.subplots()
+    ax.set_title("Mean number of trades against standard deviation\nfor fundamental price interpretation of agents")
+    ax.set_ylabel("Num. Trades")
+    ax.set_xlabel("Fundamental price interpretation std GBP")
+    ax.grid(True, which="both", axis="both", alpha=0.5)
+    ax.plot(np.array(stds) / 100, num_trades, "blue")

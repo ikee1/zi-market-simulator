@@ -23,9 +23,13 @@ class Simulator:
         fp = 10000  # initial fair price in pence
         fps = []
         diffs = []
+        trades_per_regime = np.zeros(int(np.ceil(NUM_RUNS/90)))
         for i in range(NUM_RUNS):
-            """if i > 0 and i % 90 == 0:
-                fp += 200"""
+            if i > 0 and i % 90 == 0:
+                fp += 200
+            if i > 0 and i % 10 == 0:
+                # get midprice, bid + ask volumes, timestamp (i), calc imbalance I
+                print("loopin")
             fps.append(fp)
             # select a random agent
             agent = random.choice(self.agents) # type: StandardAgent
@@ -41,9 +45,14 @@ class Simulator:
             for trade in new_trades:
                 diff = np.abs(trade.get_price() - fp)
                 diffs.append(diff)
+            
         trades = self.lob.get_trades()
         mad = np.mean(diffs)
-        return trades, fps, mad
+        for trade in trades:
+            regime = trade.get_timestamp() // 90
+            trades_per_regime[regime] += 1
+
+        return trades, fps, mad, trades_per_regime
         
 
         

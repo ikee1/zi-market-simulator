@@ -174,10 +174,30 @@ I have now set up the following mechanic:
 
 Investigating the MAD, the mean absolute deviation from the fundamental price from each trade resulted in the following graph.
 <p align="center">
-<img src="figures/mad_std.png" width="500">
+<img src="figures/mad_std_test_1.png" width="500">
 </p>
 With fundamental price std in pence. This was for a fundamental price which increased every 90 steps by £2 (100->102->104..). I think the high MAD at low fp std is due to many runs not actually "finding" the fundamental price at all since it is gradually moving away and so they are unable to get a good price around the previous price and so trades dry up, every agent is buying because they still all believe they are below the fundamental price. I will now consider a constant fundamental price, and see if this changes things.
 This produced a graph which was very much what I expected, as fp std increases, so does mean deviation from the fundamental price.
 <p align="center">
 <img src="figures/mad_constant_fp.png" width="500">
 </p>
+I will now investigate average number of trades alongside MAD with increasing fp again, to confirm whether higher MAD at lower std for being due to lower trades makes sense.
+<p align="center">
+<img src="figures/num_trades_std.png" width="500">
+<img src="figures/mad_std.png" width="500">
+</p>
+This very nicely matches my expectations and confirms my hypothesis. Note: agent standard deviation for order prices was kept at £0.50 this entire time, only fundamental price interpretation std was varied. Finally, I obtained results for the average number of trades per fundamental price regime for different std deviations, this showed a much large number of trades at lower std with steep drop offs as we get into higher fundamental price, with higher std seeing shallower drop-offs.
+
+## September 4th 2026
+I intend to consider how the volume of each side of the order book effects the future returns of the stock. I want to consider the imbalance every maybe 5 or so timesteps by calculating the ratio 
+$$
+I = \frac{(V_B - V_A)}{(V_A + V_B)},\quad|I| ≤ 1
+$$
+This is a measure of the imbalance in the order book. When it is large and positive, we know that we have an imbalance on the bids side of the book, i.e. more bids than asks are sitting in the book and vice-versa for a large negative $I$. This leads us to the hypothesis we are testing of whether order book imbalance is related to short-term returns, with a stronger relationship at larger $|I|$. We will investigate how the future returns move over the following couple of timesteps after our snapshot is taken. We would predict in a normal market that an increased bid volume may lead to short term positive returns, and vice-versa for an increased ask volume, I got this idea as a slight adaptation from Cont Et al. in *The Price Impact of Order Book Events* in 2014 where they discuss order flow imbalance and how that affects short-term returns. Here I am looking more at the static state of the order book. We want to find out whether this holds true for our simulation, whether the simulation recreates this environemnt despite zero-intelligence agents.
+
+Important question of whether I take the entire book of orders for each side, or only, say, the top 5 levels, or the top 10%, or something. Since I wonder whether old bids which never got filled from when the price was much lower may just sit there, adding false volume to the bid side. And for returns, I will consider the midpoint between the best ask and the best bid, rather than just taking the recently traded price or anything like that.
+
+General concepts:
+- every n timesteps, get the ask and bid volumes, the midprice, and the timestamp itself (or the value of n, either) and calculate the imbalance $I$. 
+- Every timestep, calculate the midprice of the book, the midpoint of the spread. 
+- After simulation is finished, calculate the returns (or log returns) from the timesteps where imbalances are taken from (every n). Initially consider the returns from the midprice at snapshot times $t = an, \, a \in \mathbb{Z}^+,$ and the midprice at horizon h = 5 timesteps later, experiment with varying the delay, t, to see how far into the future this relationship holds (if at all) in our simulation (h = 1, 2, 5, 10, ...).

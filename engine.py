@@ -185,3 +185,6 @@ class LimitOrderBook:
     
     def get_trades(self):
         return self._completed_trades
+    
+    def get_ask_volume(self):
+        return

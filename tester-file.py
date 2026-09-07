@@ -4,5 +4,6 @@ import numpy as np
 
 import random
 
-deviations = np.linspace(0.5, 10, 20)
-print(deviations) 
+list = [[1, 2, 3, 4, 5, 6],[1, 2, 3, 4, 5, 6],[1, 2, 3, 4, 5, 6]]
+mean = np.mean(list, axis=1)
+print(mean)

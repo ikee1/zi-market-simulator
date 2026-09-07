@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from orders import Trade
+from engine import LimitOrderBook
 
 def get_prices(trades):
     return [trade.get_price() for trade in trades]
@@ -79,4 +80,5 @@ def calculate_vwap(trades):
             vwaps.append(vwaps[-1])
 
     return vwaps, times_list
+
 

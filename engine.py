@@ -221,10 +221,6 @@ class LimitOrderBook:
         return np.sum(tot_vols)
         
     def get_midprice(self):
-        print("asks_list:", len(self._asks_list))
-        print("bids_list:", len(self._bids_list))
-        print("asks dict:", len(self._asks))
-        print("bids dict:", len(self._bids))
         mid = (self._asks_list[0] + self._bids_list[-1]) / 2
         # mid = 2
         return mid

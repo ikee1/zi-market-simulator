@@ -20,34 +20,44 @@ class Simulator:
             agent = StandardAgent(order_std=std_deviation_agents, fp_std=fp_std_deviation_agents)
             self.agents.append(agent)
 
-    def run(self, NUM_RUNS, N_levels, horizon, sampling_interval):
+    def run(self, NUM_RUNS, N_level_max, horizon, sampling_interval):
         fp = 10000  # initial fair price in pence
         fps = []
         diffs = []
-        pending = deque([])
-        times = deque([])
-        imbalance_results = []
+        # I need to make this work for all 10 N_levels for the same simulation
+        pending = [deque() for _ in range(N_level_max)]
+        times = [deque() for _ in range(N_level_max)]
+        imbalance_results = [[] for _ in range(N_level_max)]
         trades_per_regime = np.zeros(int(np.ceil(NUM_RUNS/90)))
         for i in range(NUM_RUNS):
-            print(f"starting {i}th run")
             if i > 0 and i % 90 == 0:
                 fp += np.random.normal(0, 50)
-            if i > 500 and i % sampling_interval == 0:
-                # imbalance
-                bid_vol = self.lob.get_bid_volume(N_levels)
-                ask_vol = self.lob.get_ask_volume(N_levels)
-                imbalance = (bid_vol - ask_vol) / (bid_vol + ask_vol)
-                # midprice
-                midprice = self.lob.get_midprice()
-                pending.append((imbalance, midprice))
-                times.append(i + horizon)
-            if times and i == times[0]: # check times has anything in (since i = 0 is skipped for imbalance, so no times appended)
-                imbalance, midprice = pending[0]
-                midprice_t = self.lob.get_midprice()
-                log_return_t = np.log(midprice_t / midprice)
-                imbalance_results.append((imbalance, log_return_t))
-                times.popleft()
-                pending.popleft()
+            # sample
+            if i > 50 and i % sampling_interval == 0:   
+                if self.lob._asks_list and self.lob._bids_list:
+                    midprice = self.lob.get_midprice()
+                    for N in range(1, N_level_max+1):
+                        # imbalance
+                        bid_vol = self.lob.get_bid_volume(N)
+                        ask_vol = self.lob.get_ask_volume(N)
+                        imbalance = (bid_vol - ask_vol) / (bid_vol + ask_vol)
+                        pending[N-1].append((imbalance, midprice))
+                        times[N-1].append(i + horizon)
+            # observation
+            for N in range(N_level_max):
+                if times[N] and i == times[N][0]: # check times[N] has anything in (since i = 0 is skipped for imbalance, so no times appended)
+                    if not self.lob._asks_list or not self.lob._bids_list:
+                        times[N].popleft()
+                        pending[N].popleft()
+                        continue
+                    imbalance, midprice = pending[N][0]
+
+                    midprice_t = self.lob.get_midprice()
+                    log_return_t = np.log(midprice_t / midprice)
+
+                    imbalance_results[N].append((imbalance, log_return_t))
+                    times[N].popleft()
+                    pending[N].popleft()
             fps.append(fp)
             # select a random agent
             agent = random.choice(self.agents) # type: StandardAgent

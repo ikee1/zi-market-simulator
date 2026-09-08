@@ -213,4 +213,6 @@ I have now implemented everything I need. I will first consider everything fixed
 
 In implementing the tests for the imbalance-return relation, I found that it was difficult to get working because the fundamental price always rose, there were lots of bids in the book and essentially always 0 asks as there was always a bid to match with the incoming asks. Because of this, I will edit my fundamental price to be able to drop, hopefully this will allow midprice calculations to actually work.
 
-![alt text](image.png)
+I have discovered another issue, I was doing separate simulations for each N, in fact each N should be done off the same simulation since changing N does not change the simulation at all, it just changes our readings of the same data. So I need to change the implementation to collect all levels I want to consider (e.g. 1-10) off the same simulation, this makes a lot of sense otherwise I am comparing across totally different simulations with vastly different random price trajectories since the simulation is inherently stochastic.
+
+![alt text](image-1.png)

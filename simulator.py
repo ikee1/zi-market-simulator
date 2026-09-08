@@ -31,7 +31,7 @@ class Simulator:
         for i in range(NUM_RUNS):
             print(f"starting {i}th run")
             if i > 0 and i % 90 == 0:
-                fp += np.random.normal(0, 200)
+                fp += np.random.normal(0, 50)
             if i > 500 and i % sampling_interval == 0:
                 # imbalance
                 bid_vol = self.lob.get_bid_volume(N_levels)

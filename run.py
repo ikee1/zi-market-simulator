@@ -15,7 +15,14 @@ interval = 10
 
 sim = Simulator()
 
-trades,_,_,_,_ = sim.run(NUM_RUNS, levels[0], horizon, interval)
+trades,_,_,_,imbalance_returns = sim.run(NUM_RUNS, levels[0], horizon, interval)
 
 plots.plot_time_series_event_driven(trades, NUM_AGENTS, NUM_RUNS)
+plt.show()
+
+print(imbalance_returns[40:50])
+imbalances = [x[0] for x in imbalance_returns]
+returns = [x[1] for x in imbalance_returns]
+fig, ax = plt.subplots()
+ax.scatter(imbalances, returns, s=5)
 plt.show()

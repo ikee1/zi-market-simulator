@@ -14,7 +14,7 @@ def plot_time_series_event_driven(trades, num_agents, num_steps):
 
     ax.set_xlabel("trade")
     ax.set_ylabel("price GBP")
-    ax.plot(prices / 100, "blue")
+    ax.plot(np.array(prices) / 100, "blue")
     ax.set_title(f"{num_agents} Agents\n{num_steps} Timesteps")
 
 def plot_returns(trades):

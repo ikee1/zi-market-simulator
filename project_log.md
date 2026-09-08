@@ -201,3 +201,14 @@ General concepts:
 - every n timesteps, get the ask and bid volumes, the midprice, and the timestamp itself (or the value of n, either) and calculate the imbalance $I$. 
 - Every timestep, calculate the midprice of the book, the midpoint of the spread. 
 - After simulation is finished, calculate the returns (or log returns) from the timesteps where imbalances are taken from (every n). Initially consider the returns from the midprice at snapshot times $t = an, \, a \in \mathbb{Z}^+,$ and the midprice at horizon h = 5 timesteps later, experiment with varying the delay, t, to see how far into the future this relationship holds (if at all) in our simulation (h = 1, 2, 5, 10, ...).
+
+## September 8th 2026
+Going to finish off the mechanics for implementing imbalance calculations. I will initially consider the volume from the entire bid and ask sides of the order book, this may include "false" volume from old trades which never end up disappearing, so I will later test using only the top few levels of each side of the order book.
+
+Considering the option of weighting each level of the order book using linear or exponential decay for each level and seeing which more accurately (if at all) indicates future returns. 
+
+So, for the imbalance counter and the delays, I will do every n timesteps -> calculate imbalance -> record timestep h timesteps into the future, t_i + h, where t_i is the current timestep along with the imbalance at that timestep, the timestep and the midprice -> once we hit t = t_i + h, calculate return using current midprice at t and append (return, imbalance) to a list as a tuple.
+
+I have now implemented everything I need. I will first consider everything fixed aside from the N_levels, the number of levels of the order book (from the best ask/bid down), I will then see which values of N_levels do the best job of predicting the future returns over a fixed horizon. Based off this "best N_levels", I will find which horizons it is best at predicting over IF ANY. I want some sort of quantitative results so I will do maybe a pearson's correlation test or Sharpe ratio or something along those lines. MAYBE, if time, consider weighting the levels (linear vs exponential $w_i = e^{-\lambda(i-1)}$ s.t. $w_1 = 1, w_2 = e^{-\lambda}, w_3 = e^{-2\lambda}$). 
+
+In implementing the tests for the imbalance-return relation, I found that it was difficult to get working because the fundamental price always rose, there were lots of bids in the book and essentially always 0 asks as there was always a bid to match with the incoming asks. Because of this, I will edit my fundamental price to be able to drop, hopefully this will allow midprice calculations to actually work.

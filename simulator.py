@@ -1,6 +1,7 @@
 from agents import StandardAgent
 from orders import Order, Trade
 from engine import LimitOrderBook
+from collections import deque
 
 import numpy as np
 import random
@@ -19,17 +20,34 @@ class Simulator:
             agent = StandardAgent(order_std=std_deviation_agents, fp_std=fp_std_deviation_agents)
             self.agents.append(agent)
 
-    def run(self, NUM_RUNS):
+    def run(self, NUM_RUNS, N_levels, horizon, sampling_interval):
         fp = 10000  # initial fair price in pence
         fps = []
         diffs = []
+        pending = deque([])
+        times = deque([])
+        imbalance_results = []
         trades_per_regime = np.zeros(int(np.ceil(NUM_RUNS/90)))
         for i in range(NUM_RUNS):
+            print(f"starting {i}th run")
             if i > 0 and i % 90 == 0:
-                fp += 200
-            if i > 0 and i % 10 == 0:
-                # get midprice, bid + ask volumes, timestamp (i), calc imbalance I
-                print("loopin")
+                fp += np.random.normal(0, 200)
+            if i > 500 and i % sampling_interval == 0:
+                # imbalance
+                bid_vol = self.lob.get_bid_volume(N_levels)
+                ask_vol = self.lob.get_ask_volume(N_levels)
+                imbalance = (bid_vol - ask_vol) / (bid_vol + ask_vol)
+                # midprice
+                midprice = self.lob.get_midprice()
+                pending.append((imbalance, midprice))
+                times.append(i + horizon)
+            if times and i == times[0]: # check times has anything in (since i = 0 is skipped for imbalance, so no times appended)
+                imbalance, midprice = pending[0]
+                midprice_t = self.lob.get_midprice()
+                log_return_t = np.log(midprice_t / midprice)
+                imbalance_results.append((imbalance, log_return_t))
+                times.popleft()
+                pending.popleft()
             fps.append(fp)
             # select a random agent
             agent = random.choice(self.agents) # type: StandardAgent
@@ -43,16 +61,16 @@ class Simulator:
                 new_trades = self.lob.process_order(order) #type: Trade
             self.time += 1
             for trade in new_trades:
-                diff = np.abs(trade.get_price() - fp)
+                diff = np.abs(trade.get_price() - fp)   
                 diffs.append(diff)
             
         trades = self.lob.get_trades()
         mad = np.mean(diffs)
-        for trade in trades:
+        """for trade in trades:
             regime = trade.get_timestamp() // 90
-            trades_per_regime[regime] += 1
+            trades_per_regime[regime] += 1"""
 
-        return trades, fps, mad, trades_per_regime
+        return trades, fps, mad, trades_per_regime, imbalance_results
         
 
         

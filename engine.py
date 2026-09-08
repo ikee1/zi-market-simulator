@@ -1,6 +1,7 @@
 from orders import Order, Trade
 from collections import deque, defaultdict
 from sortedcontainers import SortedList
+import numpy as np
 class LimitOrderBook:
     """
     Limit Order Book object
@@ -186,5 +187,44 @@ class LimitOrderBook:
     def get_trades(self):
         return self._completed_trades
     
-    def get_ask_volume(self):
-        return
+    def get_ask_volume(self, N_levels):
+        # we need to loop over the top N_levels levels in the ask dictionary, this should be pretty straight forward but how are edge cases handled?
+        # what if there are only 2 prices in the book so far, since it is still early in the simulation? 
+        # very neat way is to take minimum of N_levels and number of levels in the book, saves another if statement.
+        if N_levels is not None: 
+            N = min(N_levels, len(self._asks_list))
+        else:
+            N = len(self._asks_list)
+        tot_vols = []
+        for i in range(N):
+            price = self._asks_list[i]
+            lvl_vols = []
+            for order in self._asks[price]: 
+                vol = order.get_count()
+                lvl_vols.append(vol)
+            tot_vols.append(np.sum(lvl_vols))
+        return np.sum(tot_vols)
+    
+    def get_bid_volume(self, N_levels):
+        if N_levels is not None: 
+            N = min(N_levels, len(self._bids_list))
+        else:
+            N = len(self._bids_list)
+        tot_vols = []
+        for i in range(N):
+            price = self._bids_list[-i-1]
+            lvl_vols = []
+            for order in self._bids[price]:
+                vol = order.get_count()
+                lvl_vols.append(vol)
+            tot_vols.append(np.sum(lvl_vols))
+        return np.sum(tot_vols)
+        
+    def get_midprice(self):
+        print("asks_list:", len(self._asks_list))
+        print("bids_list:", len(self._bids_list))
+        print("asks dict:", len(self._asks))
+        print("bids dict:", len(self._bids))
+        # mid = (self._asks_list[0] + self._bids_list[-1]) / 2
+        mid = 2
+        return mid

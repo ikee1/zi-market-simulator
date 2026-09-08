@@ -60,4 +60,6 @@ ax.set_ylabel("Correlation: imbalance vs future return")
 ax.set_title("Predictive power of order book imbalance")
 
 plt.show()
+for i in range(len(levels)):
+    print(f"level: {levels[i]} -> mean_corr: {means[i]}")
 

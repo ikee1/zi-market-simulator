@@ -215,4 +215,21 @@ In implementing the tests for the imbalance-return relation, I found that it was
 
 I have discovered another issue, I was doing separate simulations for each N, in fact each N should be done off the same simulation since changing N does not change the simulation at all, it just changes our readings of the same data. So I need to change the implementation to collect all levels I want to consider (e.g. 1-10) off the same simulation, this makes a lot of sense otherwise I am comparing across totally different simulations with vastly different random price trajectories since the simulation is inherently stochastic.
 
+<p align="center">
+<img src="figures/order_book_depth_correlation.png" width="500">
+</p>
+
+So this pretty clearly shows us that N = 3 at a mean correlation of 0.066 is the optimal depth to analyse when looking at order book imbalance's effect on returns over a fixed horizon of 10 timesteps, sampled every 10 steps. Now I need to find out the optimal horizon to look over for a fixed N = 3. This will give me the optimal pairing to attempt to get a Sharpe ratio for and finish this off. 
+
+## September 9th 2026
+The results indiciate predictive power is strongest at lower horizons, with h = 5 being the peak of our graph here. I will repeat the experiment zoomed into these lower horizons to find the optimal value. This was at a sampling interval s = 10 and depth of order book consideration of N = 3. The simulation was repeated 15 times, and the average correlation of imbalance and log returns was recorded for each horizon .
+![alt text](image.png)
+
+Now, we can see there is a clear peak at h = 2 timesteps. I am going to investigate the range 1 through 10 more clearly. For this, I will reduce my sampling interval to be every timestep, s = 1.
 ![alt text](image-1.png)
+
+This clearly indicates that horizon = 2 is the ideal parameter. So now I will consider Sharpe ratio using the optimised number of levels = 3 and horizon = 2 on entirely new, out of sample data (since each time I run the simulation, the data is completely fresh). Whilst this is returning relatively small correlations even at the peak of around 0.11, I will see how the Sharpe goes. 
+
+I will be considering the Sharpe over a period, rather than any sort of annualised Sharpe since it is not fully defined what each timestep is. 
+
+I achieved an initial Sharpe of 0.08869925978309587, which is not great and may suggest the simulation does not recreate the environment needed to produce meaningful returns from this strategy. I will compare it to a strategy made up of ranom positions. This ultimately provided me with a Sharpe ratio from the strategy (on a new run) of 0.090 (2sf) and from a random strategy taking random positions over the same horizon = 2, achieved a Sharpe of 0.00063 (2sf). This very strongly demonstrates that the simulation does develop a weak but non-random relationship between order-book imbalance and subsequent price movements.

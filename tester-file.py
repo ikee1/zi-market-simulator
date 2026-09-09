@@ -35,3 +35,7 @@ print(sum)
 levels = np.arange(1, 11)
 
 print(levels)
+
+horizons = [5, 10, 20, 30, 50]
+all_corrs = {horizon: [] for horizon in horizons}
+print(all_corrs)

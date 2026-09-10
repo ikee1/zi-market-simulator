@@ -54,7 +54,7 @@ class StandardAgent(AgentBase):
     
     def get_quantity(self, min_quantity: int, max_quantity: int):
         """Generate a random order quantity in intervals of 100"""
-        num = np.random.randint(min_quantity/100, max_quantity/100 + 100)
+        num = np.random.randint(min_quantity/100, max_quantity/100 + 1)
         quantity = int(num * 100)
         return quantity
 

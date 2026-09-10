@@ -1,19 +1,18 @@
-"""
-Zero-Intelligence trader
-"""
 import random
+
 import numpy as np
-from orders import Order, Trade
+
+from orders import Order
 from maths import box_muller
-import analysis
 
 current_id = 0
+
+
 class AgentBase:
     """
-    The base class, all different personalities of trader will derive from this.
+    Base class for all trader types in the simulation.
     """
-    def __init__(self):
-        # each agent should have an id (later add cash and inventory) 
+    def __init__(self): 
         global current_id
         self.id = current_id
         current_id += 1
@@ -23,46 +22,72 @@ class AgentBase:
     
 class StandardAgent(AgentBase):
     """
-    Very default test agent to see how things work
+    Trader that generates stochastic orders around a perceived
+    fundamental price.
+
+    Parameters
+    ----------
+    order_std : float
+        Standard deviation in pence assigned to the normal distribution from which the agent's trade
+        price is sampled, with a mean of the perceived fundamental price
+    fp_std : float
+        Standard deviation in pence assigned to the normal distribution from which the agent's perception of 
+        the fundamental price is sampled, with a mean of the true fundamental price
     """
     def __init__(self, order_std=50, fp_std=10):
-        # std dev in pence
         super().__init__()
-        self.std_dev = order_std
-        self.fp_std_dev = fp_std
-        self.current_price = 0
+        self._order_std = order_std
+        self._fp_std = fp_std
 
-    def get_trade_price(self, previous_price, perceived_fundamental_price):
-        rand = box_muller()  # random normal variable
-        deviation = self.std_dev * rand
+    def get_trade_price(self, perceived_fundamental_price):
+        """Generate an order price around a perceived fundamental price"""
+        rand = box_muller() 
+        deviation = self._order_std * rand
         return perceived_fundamental_price + deviation
     
     def get_fp(self, fundamental_price):
-        # we need to change our belief of the fundamental price based on the std 
+        """Generate the agent's perceived fundamental price""" 
         rand = box_muller()
-        dev = self.fp_std_dev * rand
-        fundamental_price_dev = fundamental_price + dev
-        return fundamental_price_dev
+        deviation = self._fp_std * rand
+        perceived_fundamental_price = fundamental_price + deviation
+        return perceived_fundamental_price
     
-    def get_quantity(self, min: int, max: int):
-        # quantity 100 to 1000 at 100 intervals
-        num = np.random.randint(min/100, max/100)
+    def get_quantity(self, min_quantity: int, max_quantity: int):
+        """Generate a random order quantity in intervals of 100"""
+        num = np.random.randint(min_quantity/100, max_quantity/100 + 100)
         quantity = int(num * 100)
         return quantity
 
-    def get_bid(self, prev_price, fundamental_price_dev):
-        # buy if previous price too low, sell if previous price too high
-        # we need to change our belief of the fundamental price based on the std 
-        if prev_price is None or prev_price == fundamental_price_dev:
+    def get_bid(self, prev_price, perceived_fundamental_price):
+        """
+        Determine whether the agent submits a bid or ask based on its
+        own perceived fundamental price
+        """
+        if prev_price is None or prev_price == perceived_fundamental_price:
             return random.choice([True, False])
-        if prev_price < fundamental_price_dev:
-            return True
-        elif prev_price > fundamental_price_dev:
-            return False 
+        
+        return prev_price < perceived_fundamental_price
 
     def create_order(self, timestamp, previous_price, fundamental_price):
+        """
+        Generate an order using the agent's perceived fundamental price
+
+        Parameters
+        ----------
+        timestamp : int
+            Current simulation time
+        previous_price : int
+            Most recent traded price
+        fundamental_price : float
+            Current true fundamental price
+        
+        Returns
+        -------
+        order : Order
+            The generated order
+        """
         perceived_fp = self.get_fp(fundamental_price)
-        price = self.get_trade_price(previous_price, perceived_fp)
+        price = self.get_trade_price(perceived_fp)
         quantity = self.get_quantity(100, 1000)
         bid = self.get_bid(previous_price, perceived_fp)
 

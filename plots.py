@@ -3,10 +3,6 @@ import matplotlib.pyplot as plt
 
 import analysis
 
-def plot_time_series(trades):
-    prices = analysis.get_prices(trades)
-    # needs vwap
-
 def plot_time_series_event_driven(trades, num_agents, num_steps):
     prices = analysis.get_prices(trades)
 

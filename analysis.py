@@ -39,14 +39,14 @@ def calculate_vwap(trades):
     Returns a tuple (vwaps, timestamps), timestamps is a list of all times with a VWAP i.e. where at least a trade happened
     Plotting would look like VWAP against timestamps 
     """
-    # for each timestamp (=1 second)
+    # for each timestamp 
     times = get_timestamps(trades)
     prices = get_prices(trades)
     quants = get_quantities(trades)
-    prod_list = [] # this will be a list of lists containing the price x quantity values for each timestamp
-    quants_list = [] # this will be a list of lists containing the quantity for each trade per time stamp, so that each list
+    prod_list = [] # list of lists containing the procuct of price and quantity for each timestep
+    quants_list = [] # list of lists containing the quantity for each trade per timestep
     times_list = [] # list of timestamps where actual trades occured, so which have a VWAP
-    # can be summed over to get the total quantity for each timestamp
+
     for i in range(len(times)):
         if times[i] not in times_list:
             times_list.append(times[i])
@@ -65,7 +65,8 @@ def calculate_vwap(trades):
             total_quants = []
             price_quant_prods.append(quants[i] * prices[i])
             total_quants.append(quants[i])
-    #appending the final list since no else to catch it
+
+    #appending the final list
     prod_list.append(price_quant_prods)
     quants_list.append(total_quants)
 

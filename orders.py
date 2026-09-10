@@ -1,4 +1,4 @@
-import numpy as np # type: ignore
+import numpy as np 
 class Order: 
     """
     Represents an order submitted to the limit order book
@@ -19,7 +19,7 @@ class Order:
     expiry_time : int, optional
         Simulation time at which a GTD order expires
     """
-    def __init__(self, price: int, count: int, bid: bool, time_submitted: int, tif = "gtd", expiry_time: int=None):
+    def __init__(self, price: int, count: int, bid: bool, time_submitted: int, tif="gtd", expiry_time: int=None):
         self._price = price  # in pence
         self._count = count
         self._id = None

@@ -19,9 +19,9 @@ I = \frac{V_{bids} - V_{asks}}{V_{bids} + V_{asks}}
 $$
 where $V_{bids}$ and $V_{asks}$ are the total bid and ask volumes respectively.
 A positive $I$ therefore indicates greater liquidity on the bid side and vice-versa.
-The question this brought about, based on the paper The Price Impact of Order Book Events by Cont et. al., was whether this imbalance could be used to predict short term returns in my model. Just as it can in the real world. I wanted to investigate whether the agents in my model reproduce the necessary behaviour to utilise this as a trading strategy, despite having very low rationality.
+Based on the paper The Price Impact of Order Book Events by Cont et al., I decided to consider whether this imbalance could be used to predict short-term returns in my simulate market, as order book imbalance has been shown to be a valid indicator of short-term price movements in real markets. I wanted to investigate whether the simulated market emulated the properties of real markets which led to this relationship, despite being made up of stochastic agents whose only information is their perception of the fundamental price of the stock.
 
-I determined the ideal order book depth $N$ and the ideal horizon $h$ to produce the maximum correlation between imbalance over the $N$ levels and subsequent returns over the horizon.
+I determined the optimal order book depth $N$ and the optimal horizon $h$ to produce the maximum correlation between imbalance over the $N$ levels and subsequent returns over the horizon.
 
 ### Book depth
 I considered the range 1-10 levels at a constant horizon and sampling interval and achieved the following results:

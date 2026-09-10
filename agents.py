@@ -88,7 +88,7 @@ class StandardAgent(AgentBase):
         """
         perceived_fp = self.get_fp(fundamental_price)
         price = self.get_trade_price(perceived_fp)
-        quantity = self.get_quantity(100, 1000)
+        quantity = self.get_quantity(1000, 10000)
         bid = self.get_bid(previous_price, perceived_fp)
 
         order = Order(price, quantity, bid, timestamp)

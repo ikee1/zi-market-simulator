@@ -163,7 +163,7 @@ VWAP for each day plot.
 
 In order to actually get stuff I can put on the CV, I need to get some quantifiable things. So one thing will be the general ability of the simulated market to "discover" the fundamental price, measuring things like difference between VWAP and fundamental value, volatility of this error, proportion of simulations that converge, number of trades/liquidity. This has essentially already been considered but just more formally. 
 
-And the main question can be something like does ordre book imbalance predict the direction of the next price movement? Can calculate the ratio 
+And the main question can be something like does order book imbalance predict the direction of the next price movement? Can calculate the ratio 
 I = (V_bids - V_asks)/(V_bids + V_asks)
 Does this being large + positive (i.e. much more bid than ask volume in the book, more demand than supply) lead to positive returns (and vice-versa).
 
@@ -193,7 +193,7 @@ I intend to consider how the volume of each side of the order book effects the f
 $$
 I = \frac{(V_B - V_A)}{(V_A + V_B)},\quad|I| ≤ 1
 $$
-This is a measure of the imbalance in the order book. When it is large and positive, we know that we have an imbalance on the bids side of the book, i.e. more bids than asks are sitting in the book and vice-versa for a large negative $I$. This leads us to the hypothesis we are testing of whether order book imbalance is related to short-term returns, with a stronger relationship at larger $|I|$. We will investigate how the future returns move over the following couple of timesteps after our snapshot is taken. We would predict in a normal market that an increased bid volume may lead to short term positive returns, and vice-versa for an increased ask volume, I got this idea as a slight adaptation from Cont Et al. in *The Price Impact of Order Book Events* in 2014 where they discuss order flow imbalance and how that affects short-term returns. Here I am looking more at the static state of the order book. We want to find out whether this holds true for our simulation, whether the simulation recreates this environemnt despite zero-intelligence agents.
+This is a measure of the imbalance in the order book. When it is large and positive, we know that we have an imbalance on the bids side of the book, i.e. more bids than asks are sitting in the book and vice-versa for a large negative $I$. This leads us to the hypothesis we are testing of whether order book imbalance is related to short-term returns, with a stronger relationship at larger $|I|$. We will investigate how the future returns move over the following couple of timesteps after our snapshot is taken. We would predict in a normal market that an increased bid volume may lead to short term positive returns, and vice-versa for an increased ask volume, I got this idea as a slight adaptation from Cont Et al. in *The Price Impact of Order Book Events* in 2014 where they discuss order flow imbalance and how that affects short-term returns. Here I am looking more at the static state of the order book. We want to find out whether this holds true for our simulation, whether the simulation recreates this environment despite zero-intelligence agents.
 
 Important question of whether I take the entire book of orders for each side, or only, say, the top 5 levels, or the top 10%, or something. Since I wonder whether old bids which never got filled from when the price was much lower may just sit there, adding false volume to the bid side. And for returns, I will consider the midpoint between the best ask and the best bid, rather than just taking the recently traded price or anything like that.
 
@@ -222,14 +222,38 @@ I have discovered another issue, I was doing separate simulations for each N, in
 So this pretty clearly shows us that N = 3 at a mean correlation of 0.066 is the optimal depth to analyse when looking at order book imbalance's effect on returns over a fixed horizon of 10 timesteps, sampled every 10 steps. Now I need to find out the optimal horizon to look over for a fixed N = 3. This will give me the optimal pairing to attempt to get a Sharpe ratio for and finish this off. 
 
 ## September 9th 2026
-The results indiciate predictive power is strongest at lower horizons, with h = 5 being the peak of our graph here. I will repeat the experiment zoomed into these lower horizons to find the optimal value. This was at a sampling interval s = 10 and depth of order book consideration of N = 3. The simulation was repeated 15 times, and the average correlation of imbalance and log returns was recorded for each horizon .
-![alt text](image.png)
+The results indiciate predictive power is strongest at lower horizons, with h = 5 being the peak of our graph here. I will repeat the experiment zoomed into these lower horizons to find the optimal value. This was at a sampling interval s = 10 and depth of order book consideration of N = 3. The simulation was repeated 15 times, and the average correlation of imbalance and log returns was recorded for each horizon. Note that there may be other combinations of N and h which produce good correlation as well, since I just considered each with the other constant, could have considered all combinations (h = 1,N = 1), (1,2),.. etc. etc., others may have got similarly good results.
+<p align="center">
+<img src="figures/horizons_corr_zoomed_out.png" width="500">
+</p>
+
 
 Now, we can see there is a clear peak at h = 2 timesteps. I am going to investigate the range 1 through 10 more clearly. For this, I will reduce my sampling interval to be every timestep, s = 1.
-![alt text](image-1.png)
+<p align="center">
+<img src="figures/horizons_corr_zoomed_in.png" width="500">
+</p>
 
 This clearly indicates that horizon = 2 is the ideal parameter. So now I will consider Sharpe ratio using the optimised number of levels = 3 and horizon = 2 on entirely new, out of sample data (since each time I run the simulation, the data is completely fresh). Whilst this is returning relatively small correlations even at the peak of around 0.11, I will see how the Sharpe goes. 
 
 I will be considering the Sharpe over a period, rather than any sort of annualised Sharpe since it is not fully defined what each timestep is. 
 
-I achieved an initial Sharpe of 0.08869925978309587, which is not great and may suggest the simulation does not recreate the environment needed to produce meaningful returns from this strategy. I will compare it to a strategy made up of ranom positions. This ultimately provided me with a Sharpe ratio from the strategy (on a new run) of 0.090 (2sf) and from a random strategy taking random positions over the same horizon = 2, achieved a Sharpe of 0.00063 (2sf). This very strongly demonstrates that the simulation does develop a weak but non-random relationship between order-book imbalance and subsequent price movements. This was over 15 runs at 100,000 steps per run, resulting in around 511k total observations.
+I achieved an initial Sharpe of 0.08869925978309587, which is not great and may suggest the simulation does not recreate the environment needed to produce meaningful returns from this strategy. I will compare it to a strategy made up of random positions. This ultimately provided me with a Sharpe ratio from the strategy (on a new run) of 0.090 (2sf) and from a random strategy taking random positions over the same horizon = 2, achieved a Sharpe of 0.00063 (2sf). This very strongly demonstrates that the simulation does develop a weak but non-random relationship between order-book imbalance and subsequent price movements. This was over 15 runs at 100,000 steps per run, resulting in around 511k total observations.
+
+I noticed as I was cleaning up my code that there was a slight sensitivity to order size in the Sharpe ratio. I had it arbitrarily at 100 to 1,000 in increments of 100 to begin with, and never thought to change it. I altered it from to 1,000 to 10,000, still at increments of 100, and found that it did produce a modest increase in the Sharpe to a consistent ~0.1 across multiple runs. I had thought it might have no effect since everything was increasing by the same multiple of 10 but I realised that since the increment was remaining constant, there were now a lot more values the orders could take, this could lead to less chance the order gets fully used up and maybe slightly more liquidity in the order book. I have left it at 1,000 to 10,000 with 100 increments since having only 10 order quantity options was very small and arbitrary, 100 seems more realistic.
+
+My final Sharpe for the strategy vs. the random control is as follows:
+
+```
+Sharpe for the strategy is 0.09939335309979493
+
+Sharpe for random control strategy is -0.0010761873845797439
+
+Mean returns is 0.00011637126892824994
+
+Standard deviation of returns is 0.001170815404641883
+
+Total observations is 1271510
+```
+
+This is for the a horizon and sampling interval of 2 steps and an included order book depth of 3 for calculating imbalance. This is 30 simulations of 100,000 runs. This is a per period Sharpe, rather than annualised since there is no definition of what the simulation timestep actually represents, e.g. if these two steps represent a day, the annualised Sharpe would be $~0.1 \times \sqrt{250} \approx 1.58$ but if each steps were a second, it would be around ~170 annualised Sharpe, which is ridiculous. So we must only consider per period Sharpe. 
+

@@ -7,7 +7,7 @@ import plots
 
 NUM_RUNS = 100000
 NUM_AGENTS = 100
-NUM_REPEATS = 15
+NUM_REPEATS = 30
 
 s = 2 # interval between imbalance calculations
 h = 2 # horizon that the returns are calculated over/position is held for after the 

@@ -3,10 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from simulator import Simulator
-import plots
 
 NUM_RUNS = 100000
-NUM_AGENTS = 100
 NUM_REPEATS = 30
 
 s = 2 # interval between imbalance calculations

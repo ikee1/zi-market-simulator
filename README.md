@@ -21,7 +21,7 @@ $$
 
 where $V_{bids}$ and $V_{asks}$ are the total bid and ask volumes respectively.
 A positive $I$ therefore indicates greater liquidity on the bid side and vice-versa.
-Based on the paper The Price Impact of Order Book Events by Cont et al., I decided to consider whether this imbalance could be used to predict short-term returns in my simulate market, as order book imbalance has been shown to be a valid indicator of short-term price movements in real markets. I wanted to investigate whether the simulated market emulated the properties of real markets which led to this relationship, despite being made up of stochastic agents whose only information is their perception of the fundamental price of the stock.
+Based on the paper The Price Impact of Order Book Events by Cont et al., I decided to consider whether this imbalance could be used to predict short-term returns in my simulated market, as order book imbalance has been shown to be a valid indicator of short-term price movements in real markets. I wanted to investigate whether the simulated market emulated the properties of real markets which led to this relationship, despite being made up of stochastic agents whose only information is their perception of the fundamental price of the stock.
 
 I determined the optimal order book depth $N$ and the optimal horizon $h$ to produce the maximum correlation between imbalance over the $N$ levels and subsequent returns over the horizon.
 

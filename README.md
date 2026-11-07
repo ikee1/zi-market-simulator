@@ -58,6 +58,11 @@ The Sharpe ratio is reported per 2-step simulation interval and is not annualise
 
 The relatively large positive Sharpe ratio compared to the near-zero random control suggests that the simulated market does exhibit a non-random, short-term relationship between order book imbalance and subsequent returns.
 
+## Future ideas
+I intend to develop this model further in order to assess whether the agent-based model accurately recreates the following (typically considered the more relevant) so-called "stylised facts" of financial markets:
+- Volatility clustering - the idea that large changes in price tend to be followed by large changes, and small changes tend to be followed by small changes (in either direction).
+- Fat tails - the distribution of financial returns are not Gaussian, they exhibit "fat tails", or are leptokurtic. This means extreme events occur more frequently than a Gaussian model would predict.
+
 ## References
 - Gode, Dhananjay K., and Shyam Sunder. “Allocative Efficiency of Markets with Zero-Intelligence Traders: Market as a Partial Substitute for Individual Rationality.” Journal of Political Economy 101, no. 1 (1993): 119–37. http://www.jstor.org/stable/2138676.
 - Cont, Rama, Arseniy Kukanov, and Sasha Stoikov. "The price impact of order book events." Journal of financial econometrics 12, no. 1 (2014): 47-88.
